@@ -14,20 +14,31 @@ export const useTimer = (settings: TimerSettings) => {
 
   const intervalRef = useRef<number | null>(null);
   const previousPhaseRef = useRef<PhaseType>('preparation');
+  const isFirstWorkPhaseRef = useRef<boolean>(true);
 
-  const playPhaseSound = useCallback((phase: PhaseType) => {
+  const playPhaseSound = useCallback((phase: PhaseType, fromPhase: PhaseType, cycle: number, set: number) => {
     switch (phase) {
       case 'preparation':
         soundManager.play('preparation');
         break;
       case 'work':
-        soundManager.play('work');
+        // Первая работа или работа после отдыха между сетами
+        if (fromPhase === 'preparation' || fromPhase === 'setRest') {
+          soundManager.play('workStart');
+          isFirstWorkPhaseRef.current = false;
+        } else if (fromPhase === 'rest') {
+          // Работа после отдыха между циклами
+          soundManager.play('workAfterRest');
+        }
         break;
       case 'rest':
         soundManager.play('rest');
         break;
       case 'setRest':
+        // Конец сета - все циклы пройдены
         soundManager.play('setEnd');
+        // Через небольшую задержку играем звук перед новым сетом
+        setTimeout(() => soundManager.play('beforeNewSet'), 1500);
         break;
       case 'completed':
         soundManager.play('completion');
@@ -73,13 +84,18 @@ export const useTimer = (settings: TimerSettings) => {
     if (state.isRunning && !state.isPaused) {
       intervalRef.current = window.setInterval(() => {
         setState((prev) => {
+          // Играем тик на последних 3 секундах
+          if (prev.timeRemaining <= 3 && prev.timeRemaining > 1) {
+            soundManager.play('tick');
+          }
+
           if (prev.timeRemaining > 1) {
             return { ...prev, timeRemaining: prev.timeRemaining - 1 };
           } else {
             const next = getNextPhase(prev.phase, prev.currentCycle, prev.currentSet);
             
             if (next.phase !== prev.phase) {
-              playPhaseSound(next.phase);
+              playPhaseSound(next.phase, prev.phase, next.cycle, next.set);
             }
 
             return {
@@ -109,7 +125,8 @@ export const useTimer = (settings: TimerSettings) => {
   }, [state.phase]);
 
   const start = useCallback(() => {
-    playPhaseSound('preparation');
+    isFirstWorkPhaseRef.current = true;
+    playPhaseSound('preparation', 'preparation', 1, 1);
     setState((prev) => ({ ...prev, isRunning: true, isPaused: false }));
   }, [playPhaseSound]);
 

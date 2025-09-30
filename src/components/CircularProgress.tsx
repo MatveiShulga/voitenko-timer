@@ -33,34 +33,36 @@ const CircularProgress = ({
   };
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
-      {/* Background circle */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="hsl(var(--muted))"
-        strokeWidth={strokeWidth}
-        opacity="0.2"
-      />
-      {/* Progress circle */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke={getPhaseColor()}
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        className="transition-all duration-300 ease-linear"
-        style={{
-          filter: `drop-shadow(0 0 8px ${getPhaseColor()})`,
-        }}
-      />
-    </svg>
+    <div className="p-4">
+      <svg width={size} height={size} className="transform -rotate-90">
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="hsl(var(--muted))"
+          strokeWidth={strokeWidth}
+          opacity="0.2"
+        />
+        {/* Progress circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={getPhaseColor()}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-300 ease-linear"
+          style={{
+            filter: `drop-shadow(0 0 3px ${getPhaseColor()})`,
+          }}
+        />
+      </svg>
+    </div>
   );
 };
 
