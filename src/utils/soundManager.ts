@@ -59,8 +59,20 @@ class SoundManager {
     }
   }
 
+  private vibrate() {
+    try {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(200);
+      }
+    } catch (error) {
+      console.warn('Failed to vibrate', error);
+    }
+  }
+
   async play(type: SoundType) {
     if (!this.isEnabled) return;
+
+    this.vibrate();
 
     if (type === 'tick') {
       this.playTick();

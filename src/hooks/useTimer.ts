@@ -22,13 +22,19 @@ export const useTimer = (settings: TimerSettings) => {
         soundManager.play('preparation');
         break;
       case 'work':
-        // Первая работа или работа после отдыха между сетами
-        if (fromPhase === 'preparation' || fromPhase === 'setRest') {
+        // vosvrat.MP3 играет только когда начинается работа во 2-м, 3-м и т.д. сетах
+        if (fromPhase === 'setRest' && set > 1) {
+          soundManager.play('beforeNewSet');
+        } else if (fromPhase === 'preparation') {
+          // Первая работа
           soundManager.play('workStart');
           isFirstWorkPhaseRef.current = false;
         } else if (fromPhase === 'rest') {
           // Работа после отдыха между циклами
           soundManager.play('workAfterRest');
+        } else if (fromPhase === 'setRest' && set === 1) {
+          // Первый сет после setRest
+          soundManager.play('workStart');
         }
         break;
       case 'rest':
@@ -37,8 +43,6 @@ export const useTimer = (settings: TimerSettings) => {
       case 'setRest':
         // Конец сета - все циклы пройдены
         soundManager.play('setEnd');
-        // Через небольшую задержку играем звук перед новым сетом
-        setTimeout(() => soundManager.play('beforeNewSet'), 1500);
         break;
       case 'completed':
         soundManager.play('completion');

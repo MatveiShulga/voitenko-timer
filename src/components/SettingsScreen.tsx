@@ -1,22 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import NumberInput from './NumberInput';
 import { TimerSettings } from '@/types/timer';
 import { Play } from 'lucide-react';
+
+const STORAGE_KEY = 'interval-timer-settings';
 
 interface SettingsScreenProps {
   onStart: (settings: TimerSettings) => void;
 }
 
 const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
-  const [settings, setSettings] = useState<TimerSettings>({
-    preparation: 15,
-    work: 30,
-    rest: 10,
-    cycles: 5,
-    setRest: 120,
-    sets: 3,
+  const [settings, setSettings] = useState<TimerSettings>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.warn('Failed to load settings from localStorage', error);
+    }
+    return {
+      preparation: 15,
+      work: 30,
+      rest: 10,
+      cycles: 5,
+      setRest: 120,
+      sets: 3,
+    };
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.warn('Failed to save settings to localStorage', error);
+    }
+  }, [settings]);
 
   const updateSetting = (key: keyof TimerSettings, value: number) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
